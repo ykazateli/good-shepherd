@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Раскраска: Добрый Пастырь | Указатели</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Comic Neue', 'Comic Sans MS', sans-serif;
+            background: #b48a62;
+            background-image: radial-gradient(circle at 10% 20%, rgba(218, 178, 115, 0.08) 0%, rgba(0,0,0,0) 50%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .app-container {
+            max-width: 900px;
+            width: 100%;
+            background: #fff6e8;
+            border-radius: 48px;
+            box-shadow: 0 20px 35px rgba(100, 70, 30, 0.15);
+            padding: 30px 30px 40px;
+            border: 1px solid #f0dbb4;
+            text-align: center;
+        }
+
+        .header {
+            margin-bottom: 20px;
+        }
+
+        .header .studio-link {
+            display: inline-block;
+            font-size: 1rem;
+            color: #4A90D9;
+            text-decoration: none;
+            font-weight: 500;
+            border-bottom: 1px solid #4A90D9;
+            padding-bottom: 2px;
+            transition: 0.2s;
+        }
+
+        .header .studio-link:hover {
+            color: #2c6aa0;
+            border-bottom-color: #2c6aa0;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            color: #4a3520;
+            margin-top: 8px;
+            margin-bottom: 4px;
+        }
+
+        .header .subtitle {
+            font-size: 1rem;
+            color: #7a5a3a;
+            font-weight: 300;
+        }
+
+        /* Палитра */
+        .palette {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 8px;
+            margin: 20px 0;
+            padding: 15px;
+            background: #ffffff;
+            border-radius: 20px;
+            border: 1px solid #e6dacb;
+        }
+
+        .color-swatch {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 3px solid transparent;
+            transition: transform 0.15s, border-color 0.15s;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
+
+        .color-swatch:hover {
+            transform: scale(1.1);
+        }
+
+        .color-swatch.active {
+            border-color: #b48a62;
+            transform: scale(1.15);
+            box-shadow: 0 0 0 3px rgba(180, 138, 98, 0.3);
+        }
+
+        /* Холст */
+        .canvas-wrapper {
+            background: #ffffff;
+            border-radius: 20px;
+            padding: 15px;
+            border: 1px solid #e6dacb;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        canvas {
+            max-width: 100%;
+            height: auto;
+            border-radius: 12px;
+            cursor: crosshair;
+            touch-action: none;
+        }
+
+        /* Кнопки */
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            background: #b48a62;
+            color: white;
+            border: none;
+            padding: 12px 28px;
+            border-radius: 40px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+            min-width: 160px;
+        }
+
+        button:hover {
+            background: #9a704a;
+            transform: translateY(-2px);
+        }
+
+        button.secondary {
+            background: #e6dacb;
+            color: #4a3520;
+        }
+
+        button.secondary:hover {
+            background: #d5c4b0;
+        }
+
+        .footer {
+            margin-top: 25px;
+            border-top: 1px solid #e6dacb;
+            padding-top: 20px;
+            text-align: center;
+        }
+
+        .footer .studio-link {
+            color: #4A90D9;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.95rem;
+            border-bottom: 1px solid #4A90D9;
+            padding-bottom: 2px;
+        }
+
+        .footer .small-note {
+            display: block;
+            margin-top: 6px;
+            color: #a58d7a;
+            font-size: 0.8rem;
+        }
+
+        @media (max-width: 600px) {
+            .app-container { padding: 20px 15px; }
+            .header h1 { font-size: 1.6rem; }
+            .color-swatch { width: 34px; height: 34px; }
+            button { padding: 10px 20px; font-size: 0.95rem; min-width: 130px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <div class="header">
+            <a href="https://vk.com/ykazateli_of_christ" target="_blank" class="studio-link">
+                🕯️ Библейская студия анимации «Указатели»
+            </a>
+            <h1>🐏 Раскраска: Добрый Пастырь</h1>
+            <p class="subtitle">Выбери цвет и раскрась картинку</p>
+        </div>
+
+        <!-- Палитра -->
+        <div class="palette" id="palette"></div>
+
+        <!-- Холст -->
+        <div class="canvas-wrapper">
+            <canvas id="coloringCanvas"></canvas>
+        </div>
+
+        <!-- Кнопки -->
+        <div class="controls">
+            <button class="secondary" onclick="resetCanvas()">🔄 Сбросить</button>
+            <button onclick="downloadImage()">💾 Скачать</button>
+        </div>
+
+        <div class="footer">
+            <a href="https://vk.com/ykazateli_of_christ" target="_blank" class="studio-link">
+                🕯️ Раскрашивайте вместе с «Указателями»
+            </a>
+            <span class="small-note">Добрый Пастырь — Иоанна 10:11</span>
+        </div>
+    </div>
+
+    <script>
+        // ============ НАСТРОЙКИ ============
+        const IMAGE_SRC = "image3.jpeg"; // Имя вашей картинки
+
+        // Палитра: базовые + телесные
+        const COLORS = [
+            "#F5D0B0", // светлая кожа
+            "#C68642", // тёмная кожа (загар)
+            "#D4A017", // золотой (колосья, солнце)
+            "#E53935", // красный
+            "#FB8C00", // оранжевый
+            "#FDD835", // жёлтый
+            "#43A047", // зелёный
+            "#ABCDEF", // небо
+            "#6D4C41", // коричневый
+            "#F48FB1", // розовый
+            "#000000", // чёрный
+            "#A8E4A0"  // яблоко
+        ];
+
+        let selectedColor = COLORS[0];
+        let canvas, ctx;
+        let originalImageData = null;
+
+        // ============ ЗАГРУЗКА КАРТИНКИ ============
+        function init() {
+            canvas = document.getElementById('coloringCanvas');
+            ctx = canvas.getContext('2d', { willReadFrequently: true });
+
+            const img = new Image();
+            img.crossOrigin = "anonymous";
+            img.onload = function() {
+                canvas.width = img.width;
+                canvas.height = img.height;
+                ctx.drawImage(img, 0, 0);
+                originalImageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                renderPalette();
+            };
+            img.onerror = function() {
+                alert("Не удалось загрузить картинку " + IMAGE_SRC);
+            };
+            img.src = IMAGE_SRC;
+        }
+
+        // ============ ПАЛИТРА ============
+        function renderPalette() {
+            const palette = document.getElementById('palette');
+            palette.innerHTML = '';
+            COLORS.forEach((color, index) => {
+                const swatch = document.createElement('div');
+                swatch.className = 'color-swatch' + (index === 0 ? ' active' : '');
+                swatch.style.background = color;
+                swatch.dataset.color = color;
+                swatch.addEventListener('click', () => {
+                    selectedColor = color;
+                    document.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('active'));
+                    swatch.classList.add('active');
+                });
+                palette.appendChild(swatch);
+            });
+        }
+
+        // ============ ЗАЛИВКА ОБЛАСТИ ============
+        function floodFill(startX, startY, fillColor) {
+            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            const data = imageData.data;
+            const width = canvas.width;
+            const height = canvas.height;
+
+            const fillRGB = hexToRgb(fillColor);
+            if (!fillRGB) return;
+
+            const startPos = (startY * width + startX) * 4;
+            const startR = data[startPos];
+            const startG = data[startPos + 1];
+            const startB = data[startPos + 2];
+
+            // Если цвет уже такой — выходим
+            if (startR === fillRGB.r && startG === fillRGB.g && startB === fillRGB.b) return;
+
+            // Если кликнули на чёрную линию — не заливаем
+            if (startR < 80 && startG < 80 && startB < 80) return;
+
+            const stack = [[startX, startY]];
+            const tolerance = 30;
+
+            while (stack.length > 0) {
+                const [x, y] = stack.pop();
+                if (x < 0 || x >= width || y < 0 || y >= height) continue;
+
+                const pos = (y * width + x) * 4;
+                const r = data[pos];
+                const g = data[pos + 1];
+                const b = data[pos + 2];
+
+                if (Math.abs(r - startR) > tolerance ||
+                    Math.abs(g - startG) > tolerance ||
+                    Math.abs(b - startB) > tolerance) continue;
+
+                if (r === fillRGB.r && g === fillRGB.g && b === fillRGB.b) continue;
+
+                data[pos] = fillRGB.r;
+                data[pos + 1] = fillRGB.g;
+                data[pos + 2] = fillRGB.b;
+                data[pos + 3] = 255;
+
+                stack.push([x + 1, y]);
+                stack.push([x - 1, y]);
+                stack.push([x, y + 1]);
+                stack.push([x, y - 1]);
+            }
+
+            ctx.putImageData(imageData, 0, 0);
+        }
+
+        function hexToRgb(hex) {
+            const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+            return result ? {
+                r: parseInt(result[1], 16),
+                g: parseInt(result[2], 16),
+                b: parseInt(result[3], 16)
+            } : null;
+        }
+
+        // ============ КЛИК ПО ХОЛСТУ ============
+        function handleCanvasClick(e) {
+            if (!originalImageData) return;
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+
+            let clientX, clientY;
+            if (e.touches) {
+                clientX = e.touches[0].clientX;
+                clientY = e.touches[0].clientY;
+            } else {
+                clientX = e.clientX;
+                clientY = e.clientY;
+            }
+
+            const x = Math.floor((clientX - rect.left) * scaleX);
+            const y = Math.floor((clientY - rect.top) * scaleY);
+
+            if (x >= 0 && x < canvas.width && y >= 0 && y < canvas.height) {
+                floodFill(x, y, selectedColor);
+            }
+        }
+
+        // ============ СБРОС ============
+        function resetCanvas() {
+            if (originalImageData) {
+                ctx.putImageData(originalImageData, 0, 0);
+            }
+        }
+
+        // ============ СКАЧАТЬ ============
+        function downloadImage() {
+            const link = document.createElement('a');
+            link.download = 'raskraska-den-zhatvy.png';
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        }
+
+        // ============ СОБЫТИЯ ============
+        document.addEventListener('DOMContentLoaded', () => {
+            init();
+            canvas.addEventListener('click', handleCanvasClick);
+            canvas.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                handleCanvasClick(e);
+            }, { passive: false });
+        });
+    </script>
+</body>
+</html>
